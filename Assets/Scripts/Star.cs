@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class Star : MonoBehaviour {
 
@@ -10,5 +11,16 @@ public class Star : MonoBehaviour {
             GameObject.Find("Cannon").GetComponent<Cannon>().DestroyStar();
             Destroy(gameObject);
         }
+    }
+
+    void Start()
+    {
+        if (SceneManager.GetActiveScene().name == "MainMenu")
+            Invoke("DestroyStar", Random.Range(1.5f, 5f));
+    }
+
+    void DestroyStar()
+    {
+        Destroy(gameObject);
     }
 }
