@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.UI;
 public class Cannon : MonoBehaviour
 {
-    GameObject cannonBall;
-
     [Header("Power Settings")]
     public float power = 30.0f;
     public float minPower = 20.0f;
@@ -20,23 +21,33 @@ public class Cannon : MonoBehaviour
     public Image powerBar;
 
     [Header("Rotation Radial")]
-    public Image rotationRadial;
+    public Text rotationRadial;
+    private char degSymbol;
 
     [Header("Ammo Information")]
     public Image numShotsImage;
     public int numShots = 5;                    // Add a GUI to show available shots using cannonball graphics
     int maxShots;
 
+    [Header("Stars Destroyed")]
+    public Text starCounter;
+    
     // Private stuff
+    private List<Rigidbody2D> rigidBodies;
     int totalStars;
     int numStars;
     float degToRad = 0.0174533f;
+    private CameraFollow followScript;
 
     // Use this for initialization
 	void Start ()
-    {
+	{
+	    degSymbol = rotationRadial.text[3];
+	    followScript = Camera.main.gameObject.GetComponent<CameraFollow>();
+        rotationRadial.GetComponent<Text>().text = cannonRotation + degSymbol.ToString();
         maxShots = numShots;
         totalStars = GameObject.FindGameObjectsWithTag("Star").Length;
+        starCounter.text = numStars + "/" + totalStars;
 	}
 
     // Update is called once per frame
@@ -68,9 +79,11 @@ public class Cannon : MonoBehaviour
             if(cannonRotation < maxCannonRotation)
             {
                 cannonRotation += rotationStep;
+                if (cannonRotation > maxCannonRotation)
+                    cannonRotation = maxCannonRotation;
                 transform.Rotate(Vector3.forward * rotationStep);
 
-                rotationRadial.GetComponent<Image>().fillAmount = (cannonRotation - minCannonRotation) / (maxCannonRotation - minCannonRotation);
+                rotationRadial.GetComponent<Text>().text = cannonRotation + degSymbol.ToString();
             }
         }
         else if(Input.GetKey(KeyCode.S))
@@ -80,10 +93,13 @@ public class Cannon : MonoBehaviour
             {
                 // Calculate the graphics perceived rotation
                 cannonRotation -= rotationStep;
+
+                if (cannonRotation < minCannonRotation)
+                    cannonRotation = minCannonRotation;
+
                 // Actually rotate the cannon
                 transform.Rotate(Vector3.back * rotationStep);
-
-                rotationRadial.GetComponent<Image>().fillAmount = (cannonRotation - minCannonRotation) / (maxCannonRotation - minCannonRotation);
+                rotationRadial.GetComponent<Text>().text = cannonRotation + degSymbol.ToString();
             }
         }
         if(Input.GetKeyDown(KeyCode.Space))
@@ -91,7 +107,7 @@ public class Cannon : MonoBehaviour
             if (numShots > 0)
             {
                 numShots--;
-                numShotsImage.fillAmount = ((float)numShots / (float)maxShots);
+                numShotsImage.fillAmount = ((float)numShots / maxShots);
                 Cannonballs();
             }
         }
@@ -100,9 +116,16 @@ public class Cannon : MonoBehaviour
             Debug.Log("Game Over");
                 
     }
-    public void DestroyStar()
+    public void DestroyStar(GameObject destroyedStar)
     {
         numStars++;
+        starCounter.text = numStars + "/" + totalStars;
+        for (int i = 0; i < rigidBodies.Count; i++)
+        {
+            if (destroyedStar == rigidBodies[i].gameObject)
+                rigidBodies.RemoveAt(i);
+        }
+
         if (numStars == totalStars)
             Debug.Log("Game Won");
     }
@@ -113,5 +136,30 @@ public class Cannon : MonoBehaviour
         GameObject cannonballInstance = (GameObject)Instantiate(Resources.Load("CannonBall"), transform.position, Quaternion.identity);
         cannonballInstance.GetComponent<Rigidbody2D>().velocity = new Vector3(power * Mathf.Cos(cannonRotation * degToRad),
                                                                     power * Mathf.Sin(cannonRotation * degToRad));
+        followScript.enabled = true;
+        followScript.objectToFollow = cannonballInstance.transform;
+        StartCoroutine("CheckAsleep");
+    }
+
+    // Gotten from http://answers.unity3d.com/questions/209472/detecting-when-all-rigidbodies-have-stopped-moving.html
+    // Slightly modified
+    IEnumerator CheckAsleep()
+    {
+        rigidBodies = FindObjectsOfType<Rigidbody2D>().ToList();
+        bool allAsleep = false;
+        while (!allAsleep)
+        {
+            allAsleep = true;
+            for (int i = 0; i < rigidBodies.Count; i++)
+            {
+                if (!rigidBodies[i].IsSleeping())
+                {
+                    allAsleep = false;
+                    yield return null;
+                    break;
+                }
+            }
+        }
+        followScript.objectToFollow = transform;
     }
 }

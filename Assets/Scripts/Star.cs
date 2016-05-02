@@ -8,7 +8,7 @@ public class Star : MonoBehaviour {
     {
         if(other.gameObject.tag == "Floor")
         {
-            GameObject.Find("Cannon").GetComponent<Cannon>().DestroyStar();
+            GameObject.Find("Cannon").GetComponent<Cannon>().DestroyStar(gameObject);
             Destroy(gameObject);
         }
     }
