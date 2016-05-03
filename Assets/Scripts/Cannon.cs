@@ -45,6 +45,7 @@ public class Cannon : MonoBehaviour
 	{
 	    degSymbol = rotationRadial.text[3];
 	    followScript = Camera.main.gameObject.GetComponent<CameraFollow>();
+        followScript.objectToFollow = transform;
         rotationRadial.GetComponent<Text>().text = cannonRotation + degSymbol.ToString();
         maxShots = numShots;
         totalStars = GameObject.FindGameObjectsWithTag("Star").Length;
@@ -145,7 +146,6 @@ public class Cannon : MonoBehaviour
         GameObject cannonballInstance = (GameObject)Instantiate(Resources.Load("CannonBall"), transform.position, Quaternion.identity);
         cannonballInstance.GetComponent<Rigidbody2D>().velocity = new Vector3(power * Mathf.Cos(cannonRotation * degToRad),
                                                                     power * Mathf.Sin(cannonRotation * degToRad));
-        followScript.enabled = true;
         followScript.objectToFollow = cannonballInstance.transform;
         StartCoroutine("CheckAsleep");
     }

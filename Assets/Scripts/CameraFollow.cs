@@ -47,8 +47,7 @@ public class CameraFollow : MonoBehaviour
         maxXandY.y = backgroundBounds.max.y - cameraBottomRight.y;
 
         // End of resolution solution
-
-	    enabled = false;
+       
     }
 	
 	// Update is called once per frame
