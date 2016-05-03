@@ -62,7 +62,7 @@ public class MenuController : MonoBehaviour
     {
         GameObject starInstance = Instantiate(fallingStar, new Vector2(Random.Range(-6f, 6.5f), 5.6f), Quaternion.identity) as GameObject;
         starInstance.transform.SetParent(canvas.transform);
-        starInstance.transform.SetSiblingIndex(1);
+        starInstance.transform.SetAsFirstSibling();
         starInstance.GetComponent<RectTransform>().localScale = new Vector3(1f, 1f, 1f);
         Invoke("SpawnStar", Random.Range(0.5f, 1f));
     }

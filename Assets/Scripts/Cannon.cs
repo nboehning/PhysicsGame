@@ -38,6 +38,7 @@ public class Cannon : MonoBehaviour
     int numStars;
     float degToRad = 0.0174533f;
     private CameraFollow followScript;
+    private bool hasWon;
 
     // Use this for initialization
 	void Start ()
@@ -112,8 +113,17 @@ public class Cannon : MonoBehaviour
             }
         }
 
-        if (numStars > 0 && numShots <= 0)
-            Debug.Log("Game Over");
+        if (numStars < totalStars && numShots == 0 && followScript.objectToFollow == transform)
+        {
+            if (hasWon)
+            {
+                DisplayVictory();
+            }
+            else
+            {
+                DisplayLose();
+            }
+        }
                 
     }
     public void DestroyStar(GameObject destroyedStar)
@@ -126,8 +136,7 @@ public class Cannon : MonoBehaviour
                 rigidBodies.RemoveAt(i);
         }
 
-        if (numStars == totalStars)
-            Debug.Log("Game Won");
+        CheckWin();
     }
 
     void Cannonballs()
@@ -141,13 +150,52 @@ public class Cannon : MonoBehaviour
         StartCoroutine("CheckAsleep");
     }
 
+    void DisplayVictory()
+    {
+        Debug.Log("You won the level!");
+    }
+
+    void DisplayLose()
+    {
+        Debug.Log("You Lost the level!");
+    }
+
+    void CheckWin()
+    {
+        if (numStars == totalStars)
+        {
+            LevelSelectController.curStarsEarned = 3;
+            LevelSelectController.maxLevel++;
+            DisplayVictory();
+        }
+
+        int minStarsNeeded = Mathf.RoundToInt(0.8f * totalStars);
+        int twoStarScore = Mathf.RoundToInt(0.9f * totalStars);
+
+        if (numStars >= minStarsNeeded)
+        {
+            if (numStars >= twoStarScore)
+            {
+                LevelSelectController.curStarsEarned = 2;
+                
+            }
+            else
+            {
+                hasWon = true;
+                LevelSelectController.curStarsEarned = 1;
+            }
+        }
+    }
+
     // Gotten from http://answers.unity3d.com/questions/209472/detecting-when-all-rigidbodies-have-stopped-moving.html
     // Slightly modified
     IEnumerator CheckAsleep()
     {
+        float timeElapsed = 0f;
+
         rigidBodies = FindObjectsOfType<Rigidbody2D>().ToList();
         bool allAsleep = false;
-        while (!allAsleep)
+        while (!allAsleep && timeElapsed < 1f) 
         {
             allAsleep = true;
             for (int i = 0; i < rigidBodies.Count; i++)
@@ -155,9 +203,14 @@ public class Cannon : MonoBehaviour
                 if (!rigidBodies[i].IsSleeping())
                 {
                     allAsleep = false;
+                    timeElapsed = 0f;
+                    Debug.Log("Time elapsed reset");
                     yield return null;
                     break;
                 }
+                timeElapsed += Time.fixedDeltaTime;
+                Debug.Log("Time Elapsed: " + timeElapsed);
+
             }
         }
         followScript.objectToFollow = transform;
