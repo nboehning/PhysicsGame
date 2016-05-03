@@ -21,7 +21,6 @@ public class LevelSelectController : MonoBehaviour
     public GameObject camera;
     public Level[] levels;
     public static int maxLevel = 1;
-    public static int selectedLevel;
     public static int curStarsEarned = -1;
     public Sprite earnedStarSprite;
     public SpriteRenderer levelImage;
@@ -33,6 +32,11 @@ public class LevelSelectController : MonoBehaviour
 	{
 	    if (SceneManager.GetActiveScene().name == "MainMenu")
 	    {
+            if(curStarsEarned != -1)
+            {
+                levels[maxLevel - 1].numStarsEarned = curStarsEarned;
+                curStarsEarned = -1;
+            }
 	        for (int i = 0; i < levels.Length; i++)
 	        {
 	            if (i < maxLevel)
@@ -52,7 +56,7 @@ public class LevelSelectController : MonoBehaviour
 	                        levels[i].starThree.sprite = earnedStarSprite;
 	                        break;
 	                }
-	                playButtons.Add(levels[i].btnPlayLevel);
+	                playButtons.Add(levels[i].btnPlayLevel);                    
 	            }
 	            else
 	            {

@@ -61,7 +61,7 @@ public class Cannon : MonoBehaviour
             {
                 power++;
 
-                powerBar.GetComponent<Image>().fillAmount = (power - minPower) / (maxPower - minPower);
+                powerBar.fillAmount = (power - minPower) / (maxPower - minPower);
             }            
         }
         else if(Input.GetKey(KeyCode.A))
@@ -71,7 +71,7 @@ public class Cannon : MonoBehaviour
             {
                 power--;
 
-                powerBar.GetComponent<Image>().fillAmount = (power - minPower) / (maxPower - minPower);
+                powerBar.fillAmount = (power - minPower) / (maxPower - minPower);
             }            
         }
 
@@ -84,7 +84,7 @@ public class Cannon : MonoBehaviour
                     cannonRotation = maxCannonRotation;
                 transform.Rotate(Vector3.forward * rotationStep);
 
-                rotationRadial.GetComponent<Text>().text = cannonRotation + degSymbol.ToString();
+                rotationRadial.text = cannonRotation + degSymbol.ToString();
             }
         }
         else if(Input.GetKey(KeyCode.S))
@@ -100,7 +100,7 @@ public class Cannon : MonoBehaviour
 
                 // Actually rotate the cannon
                 transform.Rotate(Vector3.back * rotationStep);
-                rotationRadial.GetComponent<Text>().text = cannonRotation + degSymbol.ToString();
+                rotationRadial.text = cannonRotation + degSymbol.ToString();
             }
         }
         if(Input.GetKeyDown(KeyCode.Space))
